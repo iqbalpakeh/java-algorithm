@@ -30,7 +30,18 @@ public class SeamCarver {
     /**
      * 2D matrix contain energy of each pixel
      */
-    private double[][] mMatrix;
+    private double[][] mEnergyCell;
+
+    /**
+     * Energy level from starting pixel to current pixel
+     */
+    private double[][] mEnergyPath;
+
+    /**
+     * Previous pixel to current pixel 
+     * (to create smallest energy path)
+     */
+    private int[][] mPreviousPixel;
 
     /**
      * Create a seam carver object based on the given picture
@@ -38,16 +49,39 @@ public class SeamCarver {
     public SeamCarver(Picture picture) {
 
         mPicture = new Picture(picture);
-        mMatrix = new double[mPicture.width()][mPicture.height()];
-        
+        mEnergyCell = new double[mPicture.width()][mPicture.height()];
+        mEnergyPath = new double[mPicture.width()][mPicture.height()];
+        mPreviousPixel = new int[mPicture.width()][mPicture.height()];
+
         debug("@MATRIX", "W = " + mPicture.width() + ", H = " + mPicture.height());
 
         for(int i=0; i<mPicture.width(); i++) {
             for (int j=0; j<mPicture.height(); j++) {
-                mMatrix[i][j] = energy(i, j); 
-                debug("@MATRIX", "(" + i + ", " + j + ") = " + mMatrix[i][j]);
+                mEnergyCell[i][j] = energy(i, j); 
+                debug("@MATRIX", "(" + i + ", " + j + ") = " + mEnergyCell[i][j]);
             }
         }
+
+        /**
+         * Topological topological = new Topological(G);
+         * for (int v : topological.order())
+         *      for (DirectedEdge e : G.adj(v))
+         *          relax(e);
+         *
+         **** Topological order for seamcarver is always from left to right, top to bottom
+         *
+         *
+         * private void relax(DirectedEdge e) {
+         *      int v = e.from(), w = e.to();
+         *      if (distTo[w] > distTo[v] + e.weight()) {
+		 *          distTo[w] = distTo[v] + e.weight();
+		 *          edgeTo[w] = e;
+	     *       }
+         * }
+         *
+         **** seam carver adjancy list is always known 
+         **** from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
+         */
     }
 
     /**
