@@ -48,7 +48,11 @@ public class TestClient extends UnitTest {
 
     /**
      * (Whitebox Testing)
-     * To test adjacently list of pixel
+     * To test adjacently list of pixel. 
+     * 
+     * This test require manual observation as it's 
+     * not possible to retrieve size and data from 
+     * iterable object.
      * 
      * $ gradle run -Pargs="input/part2week2/6x5.png"
      * 

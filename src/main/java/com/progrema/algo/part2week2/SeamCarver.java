@@ -109,9 +109,13 @@ public class SeamCarver {
 
     /**
      * Return the iterable object contain the adjacenty list 
-     * from pixel with column x and row y
+     * from pixel with column x and row y.
+     * 
+     * Seam Carver adjacency list is always known. If pixel is (x, y), than
+     * adjacency list are (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
      * 
      * @param pixel from picture
+     * @return iterable adjacency list
      */
     private Iterable<Pixel> adj(Pixel pixel) {
 
