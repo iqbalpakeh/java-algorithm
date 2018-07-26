@@ -16,7 +16,7 @@ public class SeamCarver {
     /**
      * Debugging flag
      */
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * Debugging filter
@@ -48,16 +48,21 @@ public class SeamCarver {
      * Helper class contain pixel column and row information
      */
     public static class Pixel {
-        int row;
-        int col;
-        
-        private Pixel(int row, int col) {
-            this.row = row;
+
+        int col; // 0 -> width - 1
+        int row; // 0 -> heigh - 1
+            
+        private Pixel(int col, int row) {            
             this.col = col;
+            this.row = row;
         }
         
-        public static Pixel newInstance(int row, int col) {
-            return new Pixel(row, col);
+        public static Pixel newInstance(int col, int row) {
+            return new Pixel(col, row);
+        }
+
+        public String toString() {
+            return "(col, row) = (" + col + ", " + row + ")";
         }
     }
 
@@ -106,25 +111,29 @@ public class SeamCarver {
      * Return the iterable object contain the adjacenty list 
      * from pixel with column x and row y
      * 
-     * @param x is pixel column
-     * @param y is pixel row
+     * @param pixel from picture
      */
     private Iterable<Pixel> adj(Pixel pixel) {
 
-        // seam carver adjancy list is always known 
-        // from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
-
         Bag<Pixel> bag = new Bag<>();
-        int row = pixel.row;
         int col = pixel.col;
+        int row = pixel.row;        
 
-        // todo: add boundary checking
-
-        bag.add(Pixel.newInstance(row - 1, col + 1));
-        bag.add(Pixel.newInstance(row, col + 1));
-        bag.add(Pixel.newInstance(row + 1, col + 1));
+        validateColumnIndex(col);
+        validateRowIndex(row);
+        
+        if (row < mPicture.height() - 1) {
+            if (col > 0) bag.add(Pixel.newInstance(col - 1, row + 1));
+            if (col < mPicture.width() - 1) bag.add(Pixel.newInstance(col + 1, row + 1));
+            bag.add(Pixel.newInstance(col, row + 1));
+        }
 
         return bag;
+    }
+
+    // DELETE THIS FUNCTION BEFORE SUBMIT TO TEST ENGINE!!
+    public Iterable<Pixel> debug_adj(Pixel pixel) {
+        return adj(pixel);
     }
 
     /**
