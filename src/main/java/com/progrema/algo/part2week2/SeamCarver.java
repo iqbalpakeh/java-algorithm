@@ -5,6 +5,7 @@
 package com.progrema.algo.part2week2;
 
 import edu.princeton.cs.algs4.Picture;
+import edu.princeton.cs.algs4.Bag;
 
 import java.awt.Color;
 import java.lang.Math;
@@ -42,6 +43,23 @@ public class SeamCarver {
      * (to create smallest energy path)
      */
     private int[][] mPreviousPixel;
+
+    /**
+     * Helper class contain pixel column and row information
+     */
+    public static class Pixel {
+        int row;
+        int col;
+        
+        private Pixel(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+        
+        public static Pixel newInstance(int row, int col) {
+            return new Pixel(row, col);
+        }
+    }
 
     /**
      * Create a seam carver object based on the given picture
@@ -82,6 +100,31 @@ public class SeamCarver {
          **** seam carver adjancy list is always known 
          **** from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
          */
+    }
+
+    /**
+     * Return the iterable object contain the adjacenty list 
+     * from pixel with column x and row y
+     * 
+     * @param x is pixel column
+     * @param y is pixel row
+     */
+    private Iterable<Pixel> adj(Pixel pixel) {
+
+        // seam carver adjancy list is always known 
+        // from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
+
+        Bag<Pixel> bag = new Bag<>();
+        int row = pixel.row;
+        int col = pixel.col;
+
+        // todo: add boundary checking
+
+        bag.add(Pixel.newInstance(row - 1, col + 1));
+        bag.add(Pixel.newInstance(row, col + 1));
+        bag.add(Pixel.newInstance(row + 1, col + 1));
+
+        return bag;
     }
 
     /**
