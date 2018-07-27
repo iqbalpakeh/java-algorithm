@@ -6,6 +6,7 @@ package com.progrema.algo.part2week2;
 
 import edu.princeton.cs.algs4.Picture;
 import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.Queue;
 
 import java.awt.Color;
 import java.lang.Math;
@@ -16,12 +17,12 @@ public class SeamCarver {
     /**
      * Debugging flag
      */
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     /**
      * Debugging filter
      */
-    private static final String FILTER = "@MATRIX";
+    private static final String FILTER = "@RELAX";
 
     /**
      * immutable object of picture
@@ -45,6 +46,12 @@ public class SeamCarver {
     private Pixel[][] mPrevPixel;
 
     /**
+     * Used to iterate 
+     * 
+     */
+    private boolean[][] mMarked;
+
+    /**
      * Helper class contain pixel column and row information
      */
     public static class Pixel {
@@ -62,7 +69,7 @@ public class SeamCarver {
         }
 
         public String toString() {
-            return "(col, row) = (" + col + ", " + row + ")";
+            return "(" + col + ", " + row + ")";
         }
     }
 
@@ -75,6 +82,7 @@ public class SeamCarver {
         mECell = new double[mPicture.width()][mPicture.height()];
         mEPath = new double[mPicture.width()][mPicture.height()];
         mPrevPixel = new Pixel[mPicture.width()][mPicture.height()];
+        mMarked = new boolean[mPicture.width()][mPicture.height()];
 
         debug("@MATRIX", "W = " + mPicture.width() + ", H = " + mPicture.height());
 
@@ -82,22 +90,40 @@ public class SeamCarver {
             for (int row=0; row<mPicture.height(); row++) {
                 mECell[col][row] = energy(col, row); 
                 mEPath[col][row] = Double.POSITIVE_INFINITY;
-                mPrevPixel[col][row] = Pixel.newInstance(col, row);
+                mPrevPixel[col][row] = null;
+                mMarked[col][row] = false;
                 debug("@MATRIX", "(" + col + ", " + row + ") = " + mECell[col][row]);
             }
         }
 
-        /**
-         * Topological order for seamcarver is always from Left to Right then from Top to Bottom
-         * and seam carver adjancy list is always known: 
-         *      from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
-         */
-        for(int col=0; col<mPicture.width(); col++) {
-            for (int row=0; row<mPicture.height(); row++) {
-                Pixel pixel = Pixel.newInstance(col, row);
-                for (Pixel adjPixel : adj(pixel)) relax(pixel, adjPixel);
+        // debug --start
+        Pixel source = Pixel.newInstance(3, 0);
+        Queue<Pixel> queue = new Queue<Pixel>();
+        queue.enqueue(source);
+        mMarked[source.col][source.row] = true;
+        while(!queue.isEmpty()) {
+            Pixel pixel = queue.dequeue();
+            for (Pixel pix : adj(pixel)) {
+                if (!mMarked[pix.col][pix.row]) {
+                    queue.enqueue(pix);
+                    mMarked[pix.col][pix.row] = true;
+                    debug("@RELAX", pix.toString());
+                }
             }
         }
+
+
+        // /**
+        //  * Topological order for seamcarver is always from Left to Right then from Top to Bottom
+        //  * and seam carver adjancy list is always known: 
+        //  *      from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
+        //  */
+        // for(int col=0; col<mPicture.width(); col++) {
+        //     for (int row=0; row<mPicture.height(); row++) {
+        //         Pixel pixel = Pixel.newInstance(col, row);
+        //         for (Pixel adjPixel : adj(pixel)) relax(pixel, adjPixel);
+        //     }
+        // }
     }
 
     /**
@@ -107,10 +133,23 @@ public class SeamCarver {
      * @param adjPixxel is adjacency of current observation pixel
      */
     private void relax(Pixel pixel, Pixel adjPixel) {
+
+        debug("@RELAX", "\npixel = " + pixel + ", adjPixel = " + adjPixel);
+
+        debug("@RELAX", "mEPath[adjPixel.col][adjPixel.row] = " + mEPath[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mEPath[pixel.col][pixel.row] = " + mEPath[pixel.col][pixel.row]);
+        debug("@RELAX", "mECell[adjPixel.col][adjPixel.row] = " + mECell[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mPrevPixel[adjPixel.col][adjPixel.row] = " + mPrevPixel[adjPixel.col][adjPixel.row]);
+
         if (mEPath[adjPixel.col][adjPixel.row] > mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row]) {
             mEPath[adjPixel.col][adjPixel.row] = mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row];
             mPrevPixel[adjPixel.col][adjPixel.row] = pixel;
         }
+
+        debug("@RELAX", "mEPath[adjPixel.col][adjPixel.row] = " + mEPath[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mEPath[pixel.col][pixel.row] = " + mEPath[pixel.col][pixel.row]);
+        debug("@RELAX", "mECell[adjPixel.col][adjPixel.row] = " + mECell[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mPrevPixel[adjPixel.col][adjPixel.row] = " + mPrevPixel[adjPixel.col][adjPixel.row]);
     }
 
     /**
