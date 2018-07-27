@@ -22,7 +22,7 @@ public class SeamCarver {
     /**
      * Debugging filter
      */
-    private static final String FILTER = "@RELAX";
+    private static final String FILTER = "@PATH";
 
     /**
      * immutable object of picture
@@ -97,33 +97,30 @@ public class SeamCarver {
         }
 
         // debug --start
-        Pixel source = Pixel.newInstance(3, 0);
+        Pixel source = Pixel.newInstance(3, 0);        
         Queue<Pixel> queue = new Queue<Pixel>();
         queue.enqueue(source);
+        mEPath[source.col][source.row] = 0.0;
         mMarked[source.col][source.row] = true;
         while(!queue.isEmpty()) {
             Pixel pixel = queue.dequeue();
-            for (Pixel pix : adj(pixel)) {
-                if (!mMarked[pix.col][pix.row]) {
-                    queue.enqueue(pix);
-                    mMarked[pix.col][pix.row] = true;
-                    debug("@RELAX", pix.toString());
+            for (Pixel adjPixel : adj(pixel)) {
+                if (!mMarked[adjPixel.col][adjPixel.row]) {
+                    queue.enqueue(adjPixel);
+                    mMarked[adjPixel.col][adjPixel.row] = true;
+                    relax(pixel, adjPixel);
+                    debug("@RELAX", adjPixel.toString());
                 }
             }
         }
 
-
-        // /**
-        //  * Topological order for seamcarver is always from Left to Right then from Top to Bottom
-        //  * and seam carver adjancy list is always known: 
-        //  *      from pixel (x, y) to pixels (x − 1, y + 1), (x, y + 1), and (x + 1, y + 1)
-        //  */
-        // for(int col=0; col<mPicture.width(); col++) {
-        //     for (int row=0; row<mPicture.height(); row++) {
-        //         Pixel pixel = Pixel.newInstance(col, row);
-        //         for (Pixel adjPixel : adj(pixel)) relax(pixel, adjPixel);
-        //     }
-        // }
+        Pixel end = Pixel.newInstance(2, 4);
+        debug("@PATH", end.toString());
+        while (mPrevPixel[end.col][end.row] != null) {        
+            end = mPrevPixel[end.col][end.row];
+            debug("@PATH", end.toString());
+        }
+        // debug --end
     }
 
     /**
