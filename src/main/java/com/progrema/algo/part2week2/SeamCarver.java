@@ -35,23 +35,6 @@ public class SeamCarver {
     private double[][] mECell;
 
     /**
-     * Energy level from starting pixel to current pixel
-     */
-    private double[][] mEPath;
-
-    /**
-     * Previous pixel to current pixel 
-     * (to create smallest energy path)
-     */
-    private Pixel[][] mPrevPixel;
-
-    /**
-     * Used to iterate 
-     * 
-     */
-    private boolean[][] mMarked;
-
-    /**
      * Helper class contain pixel column and row information
      */
     public static class Pixel {
@@ -80,76 +63,66 @@ public class SeamCarver {
 
         mPicture = new Picture(picture);
         mECell = new double[mPicture.width()][mPicture.height()];
-        mEPath = new double[mPicture.width()][mPicture.height()];
-        mPrevPixel = new Pixel[mPicture.width()][mPicture.height()];
-        mMarked = new boolean[mPicture.width()][mPicture.height()];
 
         debug("@MATRIX", "W = " + mPicture.width() + ", H = " + mPicture.height());
 
         for(int col=0; col<mPicture.width(); col++) {
             for (int row=0; row<mPicture.height(); row++) {
                 mECell[col][row] = energy(col, row); 
-                mEPath[col][row] = Double.POSITIVE_INFINITY;
-                mPrevPixel[col][row] = null;
-                mMarked[col][row] = false;
                 debug("@MATRIX", "(" + col + ", " + row + ") = " + mECell[col][row]);
             }
         }
 
-        // debug --start
-        Pixel source = Pixel.newInstance(3, 0);        
-        Queue<Pixel> queue = new Queue<Pixel>();
-        queue.enqueue(source);
-        mEPath[source.col][source.row] = 1000;
-        mMarked[source.col][source.row] = true;
-        while(!queue.isEmpty()) {
-            Pixel pixel = queue.dequeue();
-            for (Pixel adjPixel : adj(pixel)) {
-                if (!mMarked[adjPixel.col][adjPixel.row]) {
-                    queue.enqueue(adjPixel);
-                    mMarked[adjPixel.col][adjPixel.row] = true;
-                    relax(pixel, adjPixel);
-                    debug("@RELAX", adjPixel.toString());
-                }
-            }
+        int[] solution = findVerticalSeam();
+        for (int i=0; i<solution.length; i++) {
+            debug("@RELAX", "" + solution[i]);
         }
-
-        debug("@RELAX", "-------------------");
-        Pixel end = Pixel.newInstance(2, 4);
-        debug("@RELAX", end.toString());
-        while (mPrevPixel[end.col][end.row] != null) {        
-            end = mPrevPixel[end.col][end.row];
-            debug("@RELAX", end.toString());
-        }
-        // debug --end
     }
 
     /**
-     * Relax energy path of current pixel
+     * Calculate energy from top to bottom
+     * 
+     * @param parent of pixel at current observation
+     * @param energy of pixel at current observation
+     * @return total energy of this path
+     */
+    private double calcPathEnergy(Pixel parent, double energy) {
+        if (parent != null) {
+            Pixel minPix = minAdj(parent);
+            if (minPix != null) energy += mECell[minPix.col][minPix.row];
+            return calcPathEnergy(minPix, energy);
+        } else return energy;
+    }
+
+    /**
+     * Build seam carver solution on queue
+     * 
+     * @param parent of pixel at current observation
+     * @param solution of seamcarver in Bag object
+     */
+    private void findSolution(Pixel parent, Queue<Pixel> solution) {
+        if (parent != null) {
+            solution.enqueue(parent);
+            Pixel minPix = minAdj(parent);
+            findSolution(minPix, solution);
+        } 
+    }
+
+    /**
+     * Select the minimum pixel among the adjacency pixels
      * 
      * @param pixel of current observation
-     * @param adjPixxel is adjacency of current observation pixel
      */
-    private void relax(Pixel pixel, Pixel adjPixel) {
-
-        debug("@RELAX", "\npixel = " + pixel + ", adjPixel = " + adjPixel);
-
-        debug("@RELAX", "Before");
-        debug("@RELAX", "mEPath" + adjPixel + "= " + mEPath[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mEPath" + pixel + " = " + mEPath[pixel.col][pixel.row]);
-        debug("@RELAX", "mECell" + adjPixel + " = " + mECell[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mPrevPixel" + adjPixel + " = " + mPrevPixel[adjPixel.col][adjPixel.row]);
-
-        if (mEPath[adjPixel.col][adjPixel.row] > mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row]) {
-            mEPath[adjPixel.col][adjPixel.row] = mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row];
-            mPrevPixel[adjPixel.col][adjPixel.row] = pixel;
+    private Pixel minAdj(Pixel pixel) {
+        double minEnergy = Double.MAX_VALUE;
+        Pixel minPix = null;
+        for (Pixel pix : adj(pixel)) {
+            if (minEnergy > mECell[pix.col][pix.row]){
+                minEnergy = mECell[pix.col][pix.row];
+                minPix = pix;
+            } 
         }
-
-        debug("@RELAX", "After");
-        debug("@RELAX", "mEPath" + adjPixel + "= " + mEPath[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mEPath" + pixel + " = " + mEPath[pixel.col][pixel.row]);
-        debug("@RELAX", "mECell" + adjPixel + " = " + mECell[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mPrevPixel" + adjPixel + " = " + mPrevPixel[adjPixel.col][adjPixel.row]);
+        return minPix;
     }
 
     /**
@@ -254,10 +227,26 @@ public class SeamCarver {
      * sequence of indices for vertical seam
      */
     public int[] findVerticalSeam() {
-        // 1. Build SPT along TOP Border
-        // 2. Use Topological Sort to find shortest path for each pixel on TOP Border
-        // 3. Get the shortest from all SPT on TOP Border. This is the the Vertical Seam
-        return null;
+
+        // Identify seam
+        double minEnergy = Double.MAX_VALUE;
+        Pixel startPixel = null;
+        for (int i=0; i<mPicture.width(); i++) {
+            Pixel pix = Pixel.newInstance(i, 0);
+            double energy = calcPathEnergy(pix, mECell[pix.col][pix.row]);
+            if (minEnergy > energy) {
+                minEnergy = energy;
+                startPixel = pix;
+            }
+        }
+        
+        // Build solution
+        Queue<Pixel> queue = new Queue<>();
+        findSolution(startPixel, queue);
+        int[] solution = new int[queue.size()];
+        int i = 0;
+        for (Pixel pixel : queue) solution[i++] = pixel.col;
+        return solution;
     }            
     
     /**
