@@ -22,7 +22,7 @@ public class SeamCarver {
     /**
      * Debugging filter
      */
-    private static final String FILTER = "@RELAX";
+    private static final String FILTER = "@TRANSPOSE";
 
     /**
      * immutable object of picture
@@ -149,11 +149,10 @@ public class SeamCarver {
             if (col < mPicture.width() - 1) bag.add(Pixel.newInstance(col + 1, row + 1));
             bag.add(Pixel.newInstance(col, row + 1));
         }
-
         return bag;
     }
 
-    // DELETE THIS FUNCTION BEFORE SUBMIT TO TEST ENGINE!!
+    // todo: DELETE THIS FUNCTION BEFORE SUBMIT TO TEST ENGINE!!
     public Iterable<Pixel> debug_adj(Pixel pixel) {
         return adj(pixel);
     }
@@ -217,12 +216,32 @@ public class SeamCarver {
     }
 
     /**
+     * transpose matrix
+     * 
+     * @param matrix to be transposed
+     */
+    private double[][] transposeMatrix(double[][] matrix) {
+
+        debug("@TRANSPOSE", "Pic Width = " + mPicture.width() + ", Pic Heigh = " + mPicture.height());
+        debug("@TRANSPOSE", "Mat Width = " + matrix.length + ", Mat Heigh = " + matrix[0].length);
+
+        // todo : transpose matrix here!!!
+        
+        return null;
+    }
+
+    // todo: DELETE THIS FUNCTION BEFORE SUBMIT TO TEST ENGINE!!
+    public double[][] debug_transposeMatrix(double[][] matrix) {
+        return transposeMatrix(matrix);
+    }
+
+    /**
      * sequence of indices for horizontal seam
      */
     public int[] findHorizontalSeam() {
         return null;
     } 
-    
+
     /**
      * sequence of indices for vertical seam
      */

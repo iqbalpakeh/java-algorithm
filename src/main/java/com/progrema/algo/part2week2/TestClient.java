@@ -17,7 +17,8 @@ public class TestClient extends UnitTest {
         // testPicture(args);
         // testEnergy(args);
         // testPixelsAdj(args);
-        testPrintSeam(args);
+        //testPrintSeam(args);
+        testTransposeMatrix(args);
     }
 
     /**
@@ -193,5 +194,29 @@ public class TestClient extends UnitTest {
         //     StdOut.print(y + " ");
         // StdOut.println("}");
         // printSeam(carver, horizontalSeam, HORIZONTAL);
+    }
+
+    /**
+     * (Whitebox Testing)
+     * Test transpose matrix function
+     * 
+     * $ gradle run -Pargs="input/part2week2/6x5.png"
+     */
+    public static void testTransposeMatrix(String[] args) {
+        startTest(new Object(){}.getClass().getEnclosingMethod().getName());
+        
+        Picture picture = new Picture(args[0]);
+        SeamCarver seamCarver = new SeamCarver(picture);  
+        double[][] ECell = new double[picture.width()][picture.height()];
+
+        for(int col=0; col<picture.width(); col++) {
+            for (int row=0; row<picture.height(); row++) {
+                ECell[col][row] = seamCarver.energy(col, row); 
+            }
+        }
+
+        seamCarver.debug_transposeMatrix(ECell);
+
+        endTest(new Object(){}.getClass().getEnclosingMethod().getName()); 
     }
 }
