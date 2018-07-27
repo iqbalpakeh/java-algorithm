@@ -22,7 +22,7 @@ public class SeamCarver {
     /**
      * Debugging filter
      */
-    private static final String FILTER = "@PATH";
+    private static final String FILTER = "@RELAX";
 
     /**
      * immutable object of picture
@@ -100,7 +100,7 @@ public class SeamCarver {
         Pixel source = Pixel.newInstance(3, 0);        
         Queue<Pixel> queue = new Queue<Pixel>();
         queue.enqueue(source);
-        mEPath[source.col][source.row] = 0.0;
+        mEPath[source.col][source.row] = 1000;
         mMarked[source.col][source.row] = true;
         while(!queue.isEmpty()) {
             Pixel pixel = queue.dequeue();
@@ -114,11 +114,12 @@ public class SeamCarver {
             }
         }
 
+        debug("@RELAX", "-------------------");
         Pixel end = Pixel.newInstance(2, 4);
-        debug("@PATH", end.toString());
+        debug("@RELAX", end.toString());
         while (mPrevPixel[end.col][end.row] != null) {        
             end = mPrevPixel[end.col][end.row];
-            debug("@PATH", end.toString());
+            debug("@RELAX", end.toString());
         }
         // debug --end
     }
@@ -133,20 +134,22 @@ public class SeamCarver {
 
         debug("@RELAX", "\npixel = " + pixel + ", adjPixel = " + adjPixel);
 
-        debug("@RELAX", "mEPath[adjPixel.col][adjPixel.row] = " + mEPath[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mEPath[pixel.col][pixel.row] = " + mEPath[pixel.col][pixel.row]);
-        debug("@RELAX", "mECell[adjPixel.col][adjPixel.row] = " + mECell[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mPrevPixel[adjPixel.col][adjPixel.row] = " + mPrevPixel[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "Before");
+        debug("@RELAX", "mEPath" + adjPixel + "= " + mEPath[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mEPath" + pixel + " = " + mEPath[pixel.col][pixel.row]);
+        debug("@RELAX", "mECell" + adjPixel + " = " + mECell[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mPrevPixel" + adjPixel + " = " + mPrevPixel[adjPixel.col][adjPixel.row]);
 
         if (mEPath[adjPixel.col][adjPixel.row] > mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row]) {
             mEPath[adjPixel.col][adjPixel.row] = mEPath[pixel.col][pixel.row] + mECell[adjPixel.col][adjPixel.row];
             mPrevPixel[adjPixel.col][adjPixel.row] = pixel;
         }
 
-        debug("@RELAX", "mEPath[adjPixel.col][adjPixel.row] = " + mEPath[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mEPath[pixel.col][pixel.row] = " + mEPath[pixel.col][pixel.row]);
-        debug("@RELAX", "mECell[adjPixel.col][adjPixel.row] = " + mECell[adjPixel.col][adjPixel.row]);
-        debug("@RELAX", "mPrevPixel[adjPixel.col][adjPixel.row] = " + mPrevPixel[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "After");
+        debug("@RELAX", "mEPath" + adjPixel + "= " + mEPath[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mEPath" + pixel + " = " + mEPath[pixel.col][pixel.row]);
+        debug("@RELAX", "mECell" + adjPixel + " = " + mECell[adjPixel.col][adjPixel.row]);
+        debug("@RELAX", "mPrevPixel" + adjPixel + " = " + mPrevPixel[adjPixel.col][adjPixel.row]);
     }
 
     /**
