@@ -212,7 +212,9 @@ public class TestClient extends UnitTest {
         for(int col=0; col<picture.width(); col++) {
             for (int row=0; row<picture.height(); row++) {
                 ECell[col][row] = seamCarver.energy(col, row); 
+                System.out.print(" " + ECell[col][row]);
             }
+            System.out.println("");
         }
 
         seamCarver.debug_transposeMatrix(ECell);

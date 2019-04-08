@@ -225,7 +225,17 @@ public class SeamCarver {
         debug("@TRANSPOSE", "Pic Width = " + mPicture.width() + ", Pic Heigh = " + mPicture.height());
         debug("@TRANSPOSE", "Mat Width = " + matrix.length + ", Mat Heigh = " + matrix[0].length);
 
-        // todo : transpose matrix here!!!
+        int heigh = matrix.length; // reverse width -> heigh
+        int width = matrix[0].length; // rever heigh -> width
+        double[][] tMatrix = new double[width][heigh];
+
+        for (int col=0; col<heigh; col++) {
+            for (int row=0; row<width; row++) {
+                tMatrix[col][row] =  matrix[row][col];
+                System.out.print(" " + tMatrix[col][row]);
+            }
+            System.out.println("");
+        }
         
         return null;
     }
